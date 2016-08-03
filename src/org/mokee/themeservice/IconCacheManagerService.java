@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015-2016 The MoKee Open Source Project
  * Copyright (C) 2016 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.cyanogenmod.themeservice;
+package org.mokee.themeservice;
 
 import android.app.Service;
 import android.content.Intent;
@@ -24,8 +25,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.cyanogenmod.internal.themes.IIconCacheManager;
-import org.cyanogenmod.internal.util.ThemeUtils;
+import org.mokee.internal.themes.IIconCacheManager;
+import org.mokee.internal.util.ThemeUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
