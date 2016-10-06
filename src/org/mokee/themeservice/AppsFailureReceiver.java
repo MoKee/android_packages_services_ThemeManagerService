@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, T-Mobile USA, Inc.
+ * Copyright (C) 2015-2016 The MoKee Open Source Project
  * Copyright (C) 2015-2016 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cyanogenmod.themeservice;
+package org.mokee.themeservice;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -25,14 +26,14 @@ import android.content.res.ThemeConfig;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import cyanogenmod.app.CMContextConstants;
-import cyanogenmod.themes.IThemeService;
-import cyanogenmod.themes.ThemeChangeRequest;
-import cyanogenmod.themes.ThemeChangeRequest.RequestType;
-import org.cyanogenmod.internal.util.ThemeUtils;
-import org.cyanogenmod.platform.internal.R;
+import mokee.app.MKContextConstants;
+import mokee.themes.IThemeService;
+import mokee.themes.ThemeChangeRequest;
+import mokee.themes.ThemeChangeRequest.RequestType;
+import org.mokee.internal.util.ThemeUtils;
+import org.mokee.platform.internal.R;
 
-import static cyanogenmod.content.Intent.ACTION_APP_FAILURE;
+import static mokee.content.Intent.ACTION_APP_FAILURE;
 
 public class AppsFailureReceiver extends BroadcastReceiver {
 
@@ -62,7 +63,7 @@ public class AppsFailureReceiver extends BroadcastReceiver {
                 if (mFailuresCount == FAILURES_THRESHOLD) {
                     // let the theme manager take care of getting us back on the default theme
                     IThemeService tm = IThemeService.Stub.asInterface(ServiceManager
-                            .getService(CMContextConstants.CM_THEME_SERVICE));
+                            .getService(MKContextConstants.MK_THEME_SERVICE));
                     final String themePkgName = ThemeConfig.SYSTEM_DEFAULT;
                     ThemeChangeRequest.Builder builder = new ThemeChangeRequest.Builder();
                     builder.setOverlay(themePkgName)
@@ -101,8 +102,8 @@ public class AppsFailureReceiver extends BroadcastReceiver {
     private void postThemeResetNotification(Context context) {
         NotificationManager nm =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String title = context.getString(org.cyanogenmod.platform.internal.R.string.theme_reset_notification_title);
-        String body = context.getString(org.cyanogenmod.platform.internal.R.string.theme_reset_notification_message);
+        String title = context.getString(org.mokee.platform.internal.R.string.theme_reset_notification_title);
+        String body = context.getString(org.mokee.platform.internal.R.string.theme_reset_notification_message);
         Notification notice = new Notification.Builder(context)
                 .setAutoCancel(true)
                 .setOngoing(false)

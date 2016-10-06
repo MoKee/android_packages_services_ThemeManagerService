@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015-2016 The MoKee Open Source Project
  * Copyright (C) 2016 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.cyanogenmod.themeservice;
+package org.mokee.themeservice;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -54,22 +55,22 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
-import cyanogenmod.app.CMStatusBarManager;
-import cyanogenmod.app.CustomTile;
-import cyanogenmod.providers.CMSettings;
-import cyanogenmod.providers.ThemesContract.MixnMatchColumns;
-import cyanogenmod.providers.ThemesContract.ThemesColumns;
-import cyanogenmod.themes.IThemeChangeListener;
-import cyanogenmod.themes.IThemeProcessingListener;
-import cyanogenmod.themes.IThemeService;
-import cyanogenmod.themes.ThemeChangeRequest;
+import mokee.app.MKStatusBarManager;
+import mokee.app.CustomTile;
+import mokee.providers.MKSettings;
+import mokee.providers.ThemesContract.MixnMatchColumns;
+import mokee.providers.ThemesContract.ThemesColumns;
+import mokee.themes.IThemeChangeListener;
+import mokee.themes.IThemeProcessingListener;
+import mokee.themes.IThemeService;
+import mokee.themes.ThemeChangeRequest;
 
-import org.cyanogenmod.internal.util.ImageUtils;
-import org.cyanogenmod.internal.util.QSConstants;
-import org.cyanogenmod.internal.util.QSUtils;
-import org.cyanogenmod.internal.util.ThemeUtils;
+import org.mokee.internal.util.ImageUtils;
+import org.mokee.internal.util.QSConstants;
+import org.mokee.internal.util.QSUtils;
+import org.mokee.internal.util.ThemeUtils;
 
-import org.cyanogenmod.platform.internal.R;
+import org.mokee.platform.internal.R;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -86,18 +87,18 @@ import java.util.zip.ZipFile;
 import libcore.io.IoUtils;
 
 import static android.content.res.ThemeConfig.SYSTEM_DEFAULT;
-import static org.cyanogenmod.internal.util.ThemeUtils.SYSTEM_THEME_PATH;
-import static org.cyanogenmod.internal.util.ThemeUtils.THEME_BOOTANIMATION_PATH;
+import static org.mokee.internal.util.ThemeUtils.SYSTEM_THEME_PATH;
+import static org.mokee.internal.util.ThemeUtils.THEME_BOOTANIMATION_PATH;
 
 public class ThemeManagerService extends Service {
     private static final String TAG = ThemeManagerService.class.getSimpleName();
     private static final boolean DEBUG = false;
 
     private static final String GOOGLE_SETUPWIZARD_PACKAGE = "com.google.android.setupwizard";
-    private static final String CM_SETUPWIZARD_PACKAGE = "com.cyanogenmod.setupwizard";
+    private static final String MK_SETUPWIZARD_PACKAGE = "com.mokee.setupwizard";
     private static final String MANAGED_PROVISIONING_PACKAGE = "com.android.managedprovisioning";
 
-    private static final String CATEGORY_THEME_CHOOSER = "cyanogenmod.intent.category.APP_THEMES";
+    private static final String CATEGORY_THEME_CHOOSER = "mokee.intent.category.APP_THEMES";
 
     // Defines a min and max compatible api level for themes on this system.
     private static final int MIN_COMPATIBLE_VERSION = 21;
@@ -400,7 +401,7 @@ public class ThemeManagerService extends Service {
     private void registerAppsFailureReceiver() {
         mAppsFailureReceiver = new AppsFailureReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(cyanogenmod.content.Intent.ACTION_APP_FAILURE);
+        filter.addAction(mokee.content.Intent.ACTION_APP_FAILURE);
         filter.addAction(ThemeUtils.ACTION_THEME_CHANGED);
         registerReceiver(mAppsFailureReceiver, filter);
     }
@@ -503,9 +504,9 @@ public class ThemeManagerService extends Service {
         final ContentResolver resolver = getContentResolver();
         int recordedApiLevel = android.os.Build.VERSION.SDK_INT;
         try {
-            recordedApiLevel = CMSettings.Secure.getInt(resolver,
-                    CMSettings.Secure.THEME_PREV_BOOT_API_LEVEL);
-        } catch (CMSettings.CMSettingNotFoundException e) {
+            recordedApiLevel = MKSettings.Secure.getInt(resolver,
+                    MKSettings.Secure.THEME_PREV_BOOT_API_LEVEL);
+        } catch (MKSettings.MKSettingNotFoundException e) {
             recordedApiLevel = -1;
             Log.d(TAG, "Previous api level not found. First time booting?");
         }
@@ -517,8 +518,8 @@ public class ThemeManagerService extends Service {
 
     private void updateThemeApi() {
         final ContentResolver resolver = getContentResolver();
-        boolean success = CMSettings.Secure.putInt(resolver,
-                CMSettings.Secure.THEME_PREV_BOOT_API_LEVEL, android.os.Build.VERSION.SDK_INT);
+        boolean success = MKSettings.Secure.putInt(resolver,
+                MKSettings.Secure.THEME_PREV_BOOT_API_LEVEL, android.os.Build.VERSION.SDK_INT);
         if (!success) {
             Log.e(TAG, "Unable to store latest API level to secure settings");
         }
@@ -613,8 +614,8 @@ public class ThemeManagerService extends Service {
         final ContentResolver resolver = getContentResolver();
         final String defaultThemePkg = ThemeUtils.getDefaultThemePackageName(this);
         if (!TextUtils.isEmpty(defaultThemePkg)) {
-            String defaultThemeComponents = CMSettings.Secure.getString(resolver,
-                    CMSettings.Secure.DEFAULT_THEME_COMPONENTS);
+            String defaultThemeComponents = MKSettings.Secure.getString(resolver,
+                    MKSettings.Secure.DEFAULT_THEME_COMPONENTS);
             List<String> components;
             if (TextUtils.isEmpty(defaultThemeComponents)) {
                 components = ThemeUtils.getAllComponents();
@@ -1016,7 +1017,7 @@ public class ThemeManagerService extends Service {
     private boolean isSetupActivity(ResolveInfo info) {
         return GOOGLE_SETUPWIZARD_PACKAGE.equals(info.activityInfo.packageName) ||
                 MANAGED_PROVISIONING_PACKAGE.equals(info.activityInfo.packageName) ||
-                CM_SETUPWIZARD_PACKAGE.equals(info.activityInfo.packageName);
+                MK_SETUPWIZARD_PACKAGE.equals(info.activityInfo.packageName);
     }
 
     private boolean handlesThemeChanges(String pkgName, List<ResolveInfo> infos) {
@@ -1228,14 +1229,14 @@ public class ThemeManagerService extends Service {
      * Get the default theme package name
      * Historically this was done using {@link ThemeUtils#getDefaultThemePackageName(Context)} but
      * the setting that is queried in that method uses the AOSP settings provider but the setting
-     * is now in CMSettings.  Since {@link ThemeUtils} is in the core framework we cannot access
-     * CMSettings.
+     * is now in MKSettings.  Since {@link ThemeUtils} is in the core framework we cannot access
+     * MKSettings.
      * @param context
      * @return Default theme package name
      */
     private static String getDefaultThemePackageName(Context context) {
-        final String defaultThemePkg = CMSettings.Secure.getString(context.getContentResolver(),
-                CMSettings.Secure.DEFAULT_THEME_PACKAGE);
+        final String defaultThemePkg = MKSettings.Secure.getString(context.getContentResolver(),
+                MKSettings.Secure.DEFAULT_THEME_PACKAGE);
         if (!TextUtils.isEmpty(defaultThemePkg)) {
             PackageManager pm = context.getPackageManager();
             try {
@@ -1255,7 +1256,7 @@ public class ThemeManagerService extends Service {
         final int userId = UserHandle.myUserId();
         final Context resourceContext = QSUtils.getQSTileContext(this, userId);
 
-        CMStatusBarManager statusBarManager = CMStatusBarManager.getInstance(this);
+        MKStatusBarManager statusBarManager = MKStatusBarManager.getInstance(this);
         final PendingIntent chooserIntent = getThemeChooserPendingIntent();
         CustomTile tile = new CustomTile.Builder(resourceContext)
                 .setLabel(R.string.qs_themes_label)
@@ -1270,7 +1271,7 @@ public class ThemeManagerService extends Service {
     }
 
     private void unpublishThemesTile() {
-        CMStatusBarManager statusBarManager = CMStatusBarManager.getInstance(this);
+        MKStatusBarManager statusBarManager = MKStatusBarManager.getInstance(this);
         statusBarManager.removeTile(QSConstants.DYNAMIC_TILE_THEMES,
                 ThemeManagerService.class.hashCode());
     }
